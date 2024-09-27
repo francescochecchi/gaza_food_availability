@@ -12,21 +12,12 @@
 #...............................................................................
 
   #...................................      
-  ## Calculate some necessary quantities
+  ## Calculate some necessary static quantities
 
     # Calculate mean Kcal requirement for Gaza population
     req_gaza <- weighted.mean(hh_pars$req, hh_pars$prop) + 
       prop_lact * req_lact + prop_preg * req_preg
     
-    # Calculate actual mean kcal intake before the war, based on data of 40+yo's
-      
-      # compute ratio of actual to recommended intake
-      x <- weighted.mean(df_ad$intake_baseline, df_ad$prop_40plus) /
-        weighted.mean(df_ad$req, df_ad$prop_40plus)
-    
-      # apply this ratio to general intake
-      act_gaza <- req_gaza * x
-      
     # Calculate the pre-war amount of required Kcal/day met through food aid
       # UNRWA refugees: 620,310 got 1675 Kcal/day, 389,680 got 902 Kcal/day
       # 20 % (all non-refugees) received WFP assistance in 4 categories, assumed
@@ -55,17 +46,11 @@
     # Distribute Kcal food aid to North and south-central
     prop_reliant_agg$kcal_met <- kcal_met * prop_reliant_agg$prop
 
-    # Compute unmet Kcal need in North vs south-central
-    prop_reliant_agg$kcal_unmet <- act_gaza * prop_reliant_agg$pop - 
-      prop_reliant_agg$kcal_met
-    prop_reliant_agg$prop_unmet <- prop_reliant_agg$kcal_unmet / 
-      (act_gaza * prop_reliant_agg$pop)
-
   #...................................      
   ## Initialise objects for simulation
     
     # Number of runs
-    n_runs <- 10
+    n_runs <- 1000
 
     # Sort truck database
     df_tr <- df_tr[order(df_tr$truck_id), ]
@@ -73,17 +58,13 @@
     # Unique list of trucks and their number of items
     all_tr <- aggregate(list(n_items = df_tr$n_items), by = list(truck_id = 
       df_tr$truck_id), FUN = sum)
-    all_tr <- all_tr[order(all_tr$truck_id), ]
-    
-    # Random numbers from 0 to 1 (one per run)
-    rx <- sort(runif(n_runs))
         
     # Loop progress bar   
     pb <- txtProgressBar(min = 1, max = n_runs, style = 3)
 
 
   #...................................      
-  ## Initialise timeline x run output and populate it with non-random quantities
+  ## Initialise timeline x run output and populate it with static quantities
     
     # Output per day, per run
     out <- expand.grid(run = 1:n_runs, date = as.Date(date_start:date_end))
@@ -149,6 +130,19 @@ for (i in 1:n_runs) {
       df_wh$rand_kcal <- (df_wh$kcal_min + runif(1) * 
         (df_wh$kcal_max - df_wh$kcal_max))
 
+      # mean kcal intake before the war, based on data of 40+yo's
+  
+        # sample from logged distributions of intake
+        df_ad$intake_rand <- exp(qnorm(runif(nrow(df_ad)), df_ad$intake_log, 
+          df_ad$intake_log_sd))
+        
+        # compute ratio of actual to recommended intake
+        x <- weighted.mean(df_ad$intake_rand, df_ad$prop_40plus) /
+          weighted.mean(df_ad$req, df_ad$prop_40plus)
+      
+        # apply this ratio to general intake
+        act_gaza <- req_gaza * x
+
   #...................................      
   ## Simulate amount of Kcal trucked in
 
@@ -190,6 +184,12 @@ for (i in 1:n_runs) {
 
   #...................................      
   ## Simulate Kcal daily contributions from non-trucking sources
+    
+    # Compute unmet Kcal need in North vs south-central
+    prop_reliant_agg$kcal_unmet <- act_gaza * prop_reliant_agg$pop - 
+      prop_reliant_agg$kcal_met
+    prop_reliant_agg$prop_unmet <- prop_reliant_agg$kcal_unmet / 
+      (act_gaza * prop_reliant_agg$pop)
     
     # Existing stocks in households from food aid, 
       # adjusted for loss due to household destruction

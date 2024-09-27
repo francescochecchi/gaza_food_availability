@@ -141,14 +141,12 @@
 
     # Add proportion of population in each group
     x <- prop_age_sex
-    x$age_cat <- x$age
     x[which(x$id %in% c(11:12, 30:31)), "age_cat"] <- "40 to 49yo"
     x[which(x$id %in% c(13:14, 32:33)), "age_cat"] <- "50 to 59yo"
     x[which(x$id %in% c(15:16, 34:35)), "age_cat"] <- "60 to 69yo"
-    x[which(x$id %in% c(17:19, 36:38)), "age_cat"] <- "70 to 100yo"
+    x[which(x$id %in% c(17:19, 36:38)), "age_cat"] <- ">=70yo"
     x <- aggregate(list(prop = x$prop), by = x[, c("age_cat", "sex")], sum)
-    colnames(x)[1] <- "age"
-    df_ad <- merge(adult_intake, x, by = c("age", "sex"), all.x = T)
+    df_ad <- merge(adult_intake, x, by = c("age_cat", "sex"), all.x = T)
 
     # Fix survey weights to account for population age-sex share of each group
     df_ad$prop_40plus <- df_ad$prop / sum(df_ad$prop)
@@ -157,7 +155,7 @@
     # Add recommended intake requirement by age-sex
     x <- intake_req
     colnames(x)[1] <- "age_broad"
-    df_ad$age_broad <- ifelse(df_ad$age_mean >= 60, "60 to 100yo", "20 to 59yo")
+    df_ad$age_broad <- ifelse(df_ad$age >= 60, "60 to 100yo", "20 to 59yo")
     df_ad <- merge(df_ad, x, by = c("age_broad", "sex"), all.x = T)
    
      

@@ -40,19 +40,22 @@
     # Prepare data
     df <- reshape(df_all[, c("week", "any_food_d", "no_food_d")], 
       direction = "long", varying = c("any_food_d", "no_food_d"),
-      idvar = "week", timevar = "category", times = c("food", "no food"),
+      idvar = "week", timevar = "category", times = c("some food", "no food"),
       v.names = "number")
-    df$category <- factor(df$category, levels = c("no food", "food"))
+    df$category <- factor(df$category, levels = c("no food", "some food"))
     df$lab <- NA
-    df[which(df$category == "food"), "lab"] <- 
+    df[which(df$category == "some food"), "lab"] <- 
       scales::percent(df_all$kg_food_d / df_all$kg_item_d, 1)
-    
+    df$period <- ifelse(df$week < as.Date("2024-05-04"), 
+      "UNRWA (pre-Rafah operation", "UNRWA (post-Rafah operation)")
+
     # Plot
-    ggplot(df, aes(x = week, y = number, colour = category, fill = category)) +
-      geom_bar(position = "stack", stat = "identity", alpha = 0.5, just = 0,
+    ggplot(df, aes(x = week, y = number, colour = category, fill = category,
+      alpha = period)) +
+      geom_bar(position = "stack", stat = "identity", just = 0,
         width = 7) +
-      geom_text(label = df$lab, size = 2.5, hjust = 0, nudge_y = -3,
-        colour = "grey20") +
+      geom_text(label = df$lab, size = 2.5, hjust = 0, nudge_y= -3, nudge_x=0.5,
+        colour = "white", alpha = 1, fontface = "bold") +
       scale_y_continuous("mean number of trucks per day", expand = c(0,0),
         limits = c(0, 250)) +
       scale_x_date("week starting", breaks = unique(df$week),
@@ -65,6 +68,7 @@
         colour = palette_gen[1], size = 3) +
       scale_colour_manual("content of truck", values = palette_gen[c(13,7)]) +    
       scale_fill_manual("content of truck", values = palette_gen[c(13,7)]) +    
+      scale_alpha_manual("period", values = c(0.50, 0.75)) +
       theme_bw() +
       theme(legend.position = "inside", legend.position.inside = c(0.1, 0.9), 
         panel.grid.minor.x = element_blank(),
@@ -76,7 +80,8 @@
         label = "pre-war daily number of food-carrying trucks (range)") +
       geom_segment(aes(x = min(week) + 7, xend = min(week) + 7,
         y = 150, yend = 180), arrow = arrow(length = unit(4, "mm"), 
-        ends = "both"), colour = "grey40")
+        ends = "both"), colour = "grey40") +
+      guides(alpha = "none")
     ggsave(paste0(dir_path, "out/05_trends_trucks.png"),
       dpi = "print", units = "cm", height = 18, width = 28)  
 
@@ -269,6 +274,7 @@
         "stocks", "warehouses", "trucked", "total"),
         labels = c("agriculture", "air / boat drops", "household stocks",
           "market stocks", "warehouse stocks", "trucks", "total"))
+      df <- df[, c("source", "all_no", "all_so")]
       colnames(df) <- c("source", "north", "south-central")
       
     # Save
@@ -283,8 +289,13 @@
   #...................................      
   ## Visualise daily Kcal per capita for North vs south-central
     
+    # Prepare data
+    df <- kcal_wk
+    df$period <- ifelse(df$week < as.Date("2024-05-04"), "pre", "post")
+    
     # Plot
-    ggplot(kcal_wk, aes(x = week, y = est, colour = area, fill = area))+
+    ggplot(df, aes(x = week, y = est, colour = area, fill = area, 
+      group = 1, alpha = period)) +
       geom_step(linewidth = 1) +
       geom_stepribbon(aes(ymin = lci95, ymax = uci95), alpha = 0.1, colour=NA) +
       geom_stepribbon(aes(ymin = lci80, ymax = uci80), alpha = 0.2, colour=NA) +
@@ -293,19 +304,21 @@
       theme_bw() +
       scale_colour_manual(values = palette_gen[c(4,12)]) +
       scale_fill_manual(values = palette_gen[c(4,12)]) +
-      scale_x_date("week starting", breaks = unique(kcal_wk$week),
+      scale_alpha_manual(values = c(0.25, 0.75)) +
+      scale_x_date("week starting", breaks = unique(df$week),
         limits = c(date_crisis, date_end), expand = c(0, 0),
         date_labels = "%d-%b-%Y") +
       geom_vline(xintercept = as.Date("2024-05-06"), linetype = "11", 
         colour = palette_gen[1]) +
-      annotate("text", x = as.Date("2024-05-10"), y = 2900,
+      annotate("text", x = as.Date("2024-05-10"), y = 200,
         label = "UN no longer able to monitor truck deliveries", hjust = 0,
         colour = palette_gen[1], size = 3) +
       facet_wrap(. ~ area, nrow = 2) +
-      scale_y_continuous("Kcal per person-day", breaks = seq(500, 3000, 200)) +
+      scale_y_continuous("Kcal per person-day", breaks = seq(000, 3600, 200),
+        limits = c(0, 3300), expand = c(0,0)) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1),
         panel.grid.minor.x = element_blank(), legend.position = "none")
-    ggsave(paste0(dir_path, "out/05_kcal_capita_trends.png", sep=""),
+    ggsave(paste0(dir_path, "out/05_trends_kcal_capita.png", sep=""),
       dpi = "print", units = "cm", height = 22, width = 22)  
     
  
@@ -352,10 +365,10 @@
     x <- date_crisis + 7 * 0:max(weekno)
     df$week <- x[findInterval(df$date, x)]
     df <- aggregate(list(mt = df$mt), by = df[, c("week", "source")], sum) 
-        
+
     # Plot both
-    pl_cg1 <- ggplot(df, aes(x = week, y = mt, colour = source, linetype = source, 
-      group = source)) +
+    pl_cg1 <- ggplot(df, aes(x = week, y = mt, colour = source, 
+      linetype = source, group = 1, alpha = period)) +
       geom_step(linewidth = 0.75) +
       theme_bw() +
       scale_x_date("date", breaks = unique(df$week), expand = c(0,0),
@@ -370,8 +383,8 @@
         label = "UN no longer able to monitor truck deliveries", hjust = 0,
         colour = palette_gen[1]) +
       theme(legend.position = "top", panel.grid.minor.x = element_blank(),
-        axis.text.x = element_text(angle = 30, vjust = 1, hjust = 1))
-    ggsave(paste0(dir_path, "out/05_unrwa_vs_cogat.png"),
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+    ggsave(paste0(dir_path, "out/05_cogat_unrwa_diff.png"),
       dpi = "print", units = "cm", height = 15, width = 25)  
     
   #...................................      
