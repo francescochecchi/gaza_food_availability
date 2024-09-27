@@ -5,7 +5,7 @@ September 2024
 ## Input data
 The following input datasets are included in the `/in` directory of the repository:
 * `gaza_food_data.xlsx`, each worksheet of which contains a single dataset. the `parameters` tab contains individual parameters. More detail on each dataset is provided in the paper;
-* `20240911_Commodities Received.xlsx`, as downloaded from https://www.unrwa.org/what-we-do/gaza-supplies-and-dispatch-tracking. This dataset is a line list of trucks that crossed the Rafah or Kerem Shalom crossings into Gaza, and details on their contents;
+* `20240911_Commodities Received.xlsx`, as downloaded from https://www.unrwa.org/what-we-do/gaza-supplies-and-dispatch-tracking. This dataset is a line list of trucks that crossed the Rafah or Kerem Shalom crossings into Gaza, and details on their contents, as maintained by UNRWA;
 * `gaza_cogat_data_24sep2014.csv`, as downloaded from https://gaza-aid-data.gov.il/main/, which contains a line list of aid consignments maintained by the Israeli MInistry of Defence.
 
 ## R scripts
