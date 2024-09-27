@@ -209,6 +209,21 @@
 #...............................................................................
 
   #...................................      
+  ## Tabulate list and frequency of individual food items
+    
+    # Prepare data
+    df <- df_tr
+    df$period <- ifelse(df$date < as.Date("2024-05-06"), 
+      "before Rafah operation", "post-Rafah operation")  
+    df <- subset(df, any_food)
+    
+    # Tabulate and save
+    x <- as.data.frame.matrix(table(df$item, df$period))
+    x$item <- rownames(x)
+    x <- x[, c("item", unique(df$period))]
+    write.csv(x, paste0(dir_path, "out/05_tab_food_items.csv"), row.names = F)
+      
+  #...................................      
   ## Tabulate cumulative food sources for North vs South-central
     
     # Prepare data
