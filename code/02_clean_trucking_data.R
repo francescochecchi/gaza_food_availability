@@ -79,6 +79,7 @@
     df_tr[, x] <- gsub("\\bambulance\\b", "ambulances", df_tr[, x])
     df_tr[, x] <- gsub("\\bbed\\b", "beds", df_tr[, x])
     df_tr[, x] <- gsub("\\bbiscuit\\b", "biscuits", df_tr[, x])
+    df_tr[, x] <- gsub("biscuites", "biscuits", df_tr[, x])
     df_tr[, x] <- gsub("\\bblanket\\b", "blankets", df_tr[, x])
     df_tr[, x] <- gsub("\\borange\\b", "oranges", df_tr[, x])
     df_tr[, x] <- gsub("\\bpistachio\\b", "pistachios", df_tr[, x])
