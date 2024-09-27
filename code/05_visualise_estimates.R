@@ -314,8 +314,8 @@
         label = "UN no longer able to monitor truck deliveries", hjust = 0,
         colour = palette_gen[1], size = 3) +
       facet_wrap(. ~ area, nrow = 2) +
-      scale_y_continuous("Kcal per person-day", breaks = seq(000, 3600, 200),
-        limits = c(0, 3300), expand = c(0,0)) +
+      scale_y_continuous("Kcal per person-day", breaks = seq(000, 3800, 200),
+        limits = c(0, 3800), expand = c(0,0)) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1),
         panel.grid.minor.x = element_blank(), legend.position = "none")
     ggsave(paste0(dir_path, "out/05_trends_kcal_capita.png", sep=""),
@@ -368,7 +368,7 @@
 
     # Plot both
     pl_cg1 <- ggplot(df, aes(x = week, y = mt, colour = source, 
-      linetype = source, group = 1, alpha = period)) +
+      linetype = source)) +
       geom_step(linewidth = 0.75) +
       theme_bw() +
       scale_x_date("date", breaks = unique(df$week), expand = c(0,0),
