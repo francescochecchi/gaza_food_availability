@@ -50,7 +50,7 @@
   ## Initialise objects for simulation
     
     # Number of runs
-    n_runs <- 100
+    n_runs <- 1000
 
     # Sort truck database
     df_tr <- df_tr[order(df_tr$truck_id), ]
@@ -169,12 +169,6 @@ for (i in 1:n_runs) {
     colnames(x) <- c("date", "trucked_in")
     x$trucked_in <- na.replace(x$trucked_in, 0)
 
-#### ADDITION FOR THIS BRANCH:
-    # Inflate total assuming underreporting after 6 May 2024
-    x[which(x$date >= as.Date("2024-05-06")), "trucked_in"] <-
-      x[which(x$date >= as.Date("2024-05-06")), "trucked_in"] / (1 - under)
-####    
-    
     # Add trucking data
     out_i <- merge(out_i, x, by = "date", all.x = T)
     out_i <- out_i[order(out_i$date), ]
@@ -346,7 +340,6 @@ close(pb)
     # Save output
     saveRDS(kcal_capita, paste0(dir_path, "out/03_kcal_capita_runs.rds"))
     
-    
   #...................................      
   ## Compute weekly estimates and 80% / 95% confidence intervals by area
     
@@ -361,12 +354,11 @@ close(pb)
     kcal_wk <- data.frame(kcal_wk$week, kcal_wk$area, 
       data.frame(kcal_wk$kcal_capita))
     colnames(kcal_wk) <- c("week","area","est","lci95","uci95","lci80","uci80")
-
-#### ALTERATION FOR THIS BRANCH:        
+    
     # Save output
-    saveRDS(kcal_wk,paste0(dir_path,"out/03_kcal_capita_by_area_",under,".rds"))
+    saveRDS(kcal_wk, paste0(dir_path, "out/03_kcal_capita_by_area.rds"))
 
-####
+
   #...................................      
   ## Compute weekly estimates and 80% / 95% confidence intervals for all of Gaza
     

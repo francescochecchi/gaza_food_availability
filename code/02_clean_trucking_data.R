@@ -56,16 +56,19 @@
     df_tr[which(is.na(df_tr$quantity)), "quantity"] <- 
       median(df_tr[which(df_tr$units == "Pallets"), "quantity"], na.rm = T)
     
-    # Compute total weight in Kg
+    # Compute total weight in Kg for non-pallet unit loads
     df_tr$kg_truck <- NA
     df_tr$kg_truck <- ifelse(df_tr$units %in% c("Truck", "CTN", "Piece", 
-      "Box", "Vehicles", "Tents", "EACH"), truck_kg, df_tr$kg_truck)
+      "Box", "Vehicles", "Tents", "EACH"), kg_truck, df_tr$kg_truck)
     df_tr$kg_truck <- ifelse(df_tr$units %in% c("Ton", "MT"),
       df_tr$quantity * 1000, df_tr$kg_truck)
-    df_tr$kg_truck <- ifelse(df_tr$units == "Pallets",
-      df_tr$quantity * pallet_kg, df_tr$kg_truck)
     
-       
+    # Compute total weight in Kg for pallet unit loads
+    x <- kg_pallet[which(kg_pallet$agency == "other" 
+      & kg_pallet$analysis == "main"), "kg_pallet"]
+    df_tr$kg_truck <- ifelse(df_tr$units == "Pallets",
+      df_tr$quantity * x, df_tr$kg_truck)
+
   #...................................      
   ## Harmonise item description column
     

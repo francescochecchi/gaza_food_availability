@@ -35,7 +35,7 @@
     df_all[is.na(df_all)] <- 0
 
   #...................................      
-  ## Visualise daily number of food-carrying trucks, compared to pre-war range
+  ## Visualise daily number of food-carrying trucks
     
     # Prepare data
     df <- reshape(df_all[, c("week", "any_food_d", "no_food_d")], 
@@ -74,13 +74,6 @@
         panel.grid.minor.x = element_blank(),
         axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
         plot.margin = margin(0.5,0.5,0.5,0.5, unit = "cm")) +
-      geom_ribbon(aes(ymin = 150, ymax = 180), colour = palette_gen[7],
-        alpha = 0.1, fill = palette_gen[7], linetype = "21") +
-      annotate("text", x = min(df$week) + 10, y = 165, size = 3, hjust = 0,
-        label = "pre-war daily number of food-carrying trucks (range)") +
-      geom_segment(aes(x = min(week) + 7, xend = min(week) + 7,
-        y = 150, yend = 180), arrow = arrow(length = unit(4, "mm"), 
-        ends = "both"), colour = "grey40") +
       guides(alpha = "none")
     ggsave(paste0(dir_path, "out/05_trends_trucks.png"),
       dpi = "print", units = "cm", height = 18, width = 28)  

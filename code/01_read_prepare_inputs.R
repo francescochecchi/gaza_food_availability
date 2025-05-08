@@ -160,7 +160,7 @@
    
      
   #...................................      
-  ## Generate dataset of population in the North vs south-central over time
+  ## Generate dataset of population in the north vs south-central over time
     
     # Interpolate to whole timeline
     df_po <- data.frame(date = as.Date(date_start : date_end),
