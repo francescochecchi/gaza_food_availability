@@ -67,7 +67,7 @@
     x <- kg_pallet[which(kg_pallet$agency == "other" 
       & kg_pallet$analysis == "main"), "kg_pallet"]
     df_tr$kg_truck <- ifelse(df_tr$units == "Pallets",
-      df_tr$quantity * x, df_tr$kg_truck)
+      df_tr$quantity * x * (1 + pallet_bias), df_tr$kg_truck)
 
   #...................................      
   ## Harmonise item description column
